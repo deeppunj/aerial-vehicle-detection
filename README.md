@@ -25,6 +25,7 @@ The photos are up to 4,000 pixels wide, so step 3 cuts them into 640 x 640 tiles
 | `09_predict_pictures.py` | prediction pictures, tiles and one full photo |
 | `10_pixel_to_latlon.py` | pixel position to latitude and longitude |
 | `11_app.py` | Streamlit web page |
+| `12_pixel_size_experiment.py` | recall when the ground pixels get bigger |
 
 Steps 1 to 10 were run on Google Colab. The web page (step 11) runs locally, because it opens in a browser on your own computer. The trained model is included as model/best.pt.
 
@@ -64,6 +65,29 @@ A random sample of 300 validation tiles, confidence 0.25. An object counts as fo
 
 Objects over 32 px are found most of the time. Recall drops for small planes and small large vehicles, and I do not have a tested reason for it. The under-16 px groups hold only 2 to 5 objects, so those numbers say little. The chart is in `results/08_recall_by_size.png`.
 
+### Pixel-size experiment
+
+The ground size of one pixel is set by the camera: pixel pitch times height above the ground, divided by the focal length. Flying twice as high doubles it. I wanted to know how fast the model loses objects when that happens, without retraining it.
+
+I took the same 300 validation tiles as above and made each one look as if it had been taken with bigger ground pixels: 1.33, 2, 2.86 and 4 times the original. Each tile is shrunk with pixel averaging (one big pixel collects the light of the block it covers) and scaled back to 640 x 640, so the model sees the same input size and the labels stay valid. Every tile is tested at every pixel size, so each tile is compared with itself. The 95% intervals come from 1,000 bootstrap draws of the 300 tiles, using the same draws at every pixel size.
+
+Change in recall against the original pixel size, in percentage points (95% interval):
+
+| Class | x1.33 | x2 | x2.86 | x4 |
+|---|---|---|---|---|
+| plane | -1.2 (-2.5 to -0.2) | -1.2 (-2.5 to -0.2) | -3.3 (-8.5 to 0.0) | -5.5 (-11.3 to -1.5) |
+| ship | -0.2 (-0.5 to +0.2) | -0.5 (-1.6 to +0.1) | -1.9 (-3.9 to -0.7) | -6.7 (-10.5 to -4.0) |
+| large vehicle | -1.9 (-4.2 to 0.0) | -3.4 (-6.6 to -0.7) | -8.4 (-13.5 to -4.0) | -16.0 (-24.1 to -8.9) |
+| all | -0.7 (-1.4 to -0.2) | -1.4 (-2.5 to -0.5) | -3.8 (-5.8 to -2.2) | -9.0 (-12.5 to -6.1) |
+
+Recall over all classes goes from 0.934 at the original pixel size to 0.920 at twice the pixel size and 0.844 at four times. Up to twice the pixel size the loss is small (1.4 points); after that it grows quickly. Large vehicles lose the most (recall 0.865 to 0.705 at x4), ships the least until x2.86. Precision hardly moves (0.844 to 0.843 over all classes): with bigger pixels the model misses more objects, but the boxes it does draw are still mostly right. I have not tested why large vehicles drop fastest.
+
+This step counts a box as right if it overlaps a real object of the same class by IoU 0.5 or more. That is a simpler count than the one Ultralytics uses in step 7, so its precision at x1 (0.844) is lower than the step 7 figure and the two should not be compared.
+
+![Recall against pixel size](results/12_pixel_size.png)
+
+![The same area at each pixel size](results/12_pixel_size_examples.jpg)
+
 ## Web page
 
 `streamlit run 11_app.py`. Upload an aerial photo, set the minimum confidence, pick which classes to show and which one is listed first, and zoom into any part of the photo at full resolution. Screenshot with a DOTA validation photo at confidence 0.50 (103 objects found), in two parts:
@@ -79,6 +103,7 @@ The lat/lon columns come from a made-up top-left corner (0, 0) and 0.5 m per pix
 - The DOTA photos have no coordinates. The latitude and longitude in step 10 and in the web page come from a made-up top-left corner and pixel size that you can change. With a georeferenced image these would be read from the file.
 - I chose the best model by its score on the validation photos and have no separate test set, so the scores are a little optimistic.
 - DOTA marks objects with tilted boxes. I turn them into straight boxes, so a tilted ship gets some extra background in its box.
+- The pixel-size experiment only averages pixels. A real coarser camera also adds its own lens blur and noise, so real losses could be larger.
 - Only normal (optical) photos are used here. No infrared, hyperspectral or segmentation.
 - The photos come from different sources and have different pixel sizes, so object sizes in metres in the web page depend on the pixel size you type in.
 
