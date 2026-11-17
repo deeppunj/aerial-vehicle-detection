@@ -1,0 +1,13 @@
+class,object size,objects,recall
+plane,under 16 px,5,0.0
+plane,16-32 px,43,0.419
+plane,32-64 px,128,0.984
+plane,64 px and more,242,0.979
+ship,under 16 px,4,1.0
+ship,16-32 px,291,0.907
+ship,32-64 px,2053,0.974
+ship,64 px and more,297,0.96
+large vehicle,under 16 px,2,0.0
+large vehicle,16-32 px,35,0.171
+large vehicle,32-64 px,485,0.866
+large vehicle,64 px and more,556,0.912

@@ -1,0 +1,5 @@
+class,precision,recall,mAP50
+plane,0.929,0.912,0.95
+ship,0.924,0.928,0.966
+large vehicle,0.889,0.82,0.895
+ALL,0.914,0.887,0.937
