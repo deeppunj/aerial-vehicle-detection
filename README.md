@@ -26,7 +26,7 @@ The photos are up to 4,000 pixels wide, so step 3 cuts them into 640 x 640 tiles
 | `10_pixel_to_latlon.py` | pixel position to latitude and longitude |
 | `11_app.py` | Streamlit web page |
 
-Steps 1 to 10 were run on Google Colab. The web page (step 11) runs locally, because it opens in a browser on your own computer. Copy `runs/optical_v1/weights/best.pt` to `model/best.pt` first.
+Steps 1 to 10 were run on Google Colab. The web page (step 11) runs locally, because it opens in a browser on your own computer. The trained model is included as model/best.pt.
 
 ```
 # On Colab, steps 1 to 10
@@ -84,4 +84,5 @@ The lat/lon columns come from a made-up top-left corner (0, 0) and 0.5 m per pix
 
 ## Credits
 
-DOTA dataset (Xia et al., Wuhan University). YOLO11 and the training library by Ultralytics (AGPL-3.0). The sample photo in test_for_streamlit_image/ is from the DOTA validation set, used for demonstration.
+DOTA dataset (Xia et al., Wuhan University). YOLO11 and the training library by Ultralytics (AGPL-3.0). 
+The sample photo in test_image_for_streamlit/ is from the DOTA validation set, used for demonstration.
